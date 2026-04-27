@@ -1,6 +1,6 @@
 # 🛡️ MiniVault v3.0 | Encryption Engine
 
-**MiniVault** is a high-performance, standalone security tool engineered for mission-critical.
+**MiniVault** is a security tool engineered for mission-critical.
 
 ![MiniVault Interface](screenshots/minivault.png)
 ![MiniVault Interface - Win+V is ENABLED](screenshots/minivault_winv_enabled.png)
