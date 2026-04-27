@@ -22,10 +22,15 @@
 ## 💻 System Requirements
 
 To maintain the integrity of the 1 GB Argon2id derivation process:
-
+- **Storage:** HDD SATA, 65 MB
 - **Processor:** Intel Core i5-6200U
-- **Memory:** 8 GB Physical RAM (Minimum).
+- **Memory:** 8 GB Dual-Channell LPDDR3.
 - **OS:** Windows 10/11 64-bit
+
+## Recommended Specifications (Optimal Performance)
+*   **CPU:** Intel Core i7-7560U or higher
+*   **RAM:** 16 GB Dual-Channel LPDDR3
+*   **Storage:** NVMe M.2 SSD (PCIe Gen3 or higher) 100 MB
 
 ---
 
