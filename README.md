@@ -2,7 +2,7 @@
 
 **MiniVault** is a high-performance, standalone security tool engineered for mission-critical.
 
-<!minivault>screenshots/minivault.png
+![MiniVault Interface](screenshots/minivault.png)
 
 ---
 
