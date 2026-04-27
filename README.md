@@ -1,4 +1,4 @@
-# 🛡️ MiniVault v2.9 | Encryption Engine
+# 🛡️ MiniVault v3.0 | Encryption Engine
 
 **MiniVault** is a high-performance, standalone security tool engineered for mission-critical.
 
