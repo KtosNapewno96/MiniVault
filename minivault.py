@@ -14,10 +14,10 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
 # ---------------- CONFIG ----------------
-APP_NAME = "MiniVault_Final_v2.9"
+APP_NAME = "MiniVault Final v3.0"
 local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/AppData/Local")
 BASE_DIR = Path(local_appdata) / "Programs" / APP_NAME
-VAULT_FILE = "vault.bin"
+VAULT_FILE = "vault.mvault"
 MAGIC = b"AES-256"
 
 
@@ -27,7 +27,7 @@ def scrub_sensitive(obj):
     if isinstance(obj, bytearray):
         for i in range(len(obj)):
             obj[i] = 0
-    
+
     # lista – zerujemy elementy
     elif isinstance(obj, list):
         for i in range(len(obj)):
@@ -41,7 +41,6 @@ def scrub_sensitive(obj):
         del obj
     except:
         pass
-
 
 
 # ---------------- CRYPTOGRAPHY ----------------
