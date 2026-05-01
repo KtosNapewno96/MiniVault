@@ -1,12 +1,119 @@
+import ctypes
+from ctypes import wintypes
+import platform
+from platform import system
+import re
+import sys
+import psutil
+from tkinter import filedialog, messagebox
+
+import winreg
+
+
+def get_cpu_name():
+    """Pobiera pełną nazwę procesora z rejestru Windows."""
+    try:
+        key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+        )
+        name, _ = winreg.QueryValueEx(key, "ProcessorNameString")
+        winreg.CloseKey(key)
+        return name.strip()
+    except:
+        return platform.processor()
+
+
+def check_hardware_requirements():
+    # --- 1. RAM CHECK ---
+    # Convert total RAM to GB
+    total_ram = psutil.virtual_memory().total / (1024**3)
+
+    # Threshold 7.5 GB (Safe for 8GB systems with integrated graphics)
+    if total_ram < 7.5:
+        messagebox.showerror(
+            "Hardware Requirement Error",
+            f"Insufficient RAM.\n"
+            f"Required: min. 8 GB RAM\n"
+            f"Detected: {total_ram:.2f} GB",
+        )
+        return False
+
+    # --- 2. CPU CHECK ---
+    full_cpu_name = get_cpu_name()
+    cpu_upper = full_cpu_name.upper()
+
+    # VIP Series (Always allowed)
+    vip_series = ["I7-", "I9-", "ULTRA", "XEON"]
+    if any(vip in cpu_upper for vip in vip_series):
+        print(f"Hardware OK: High-performance series detected ({full_cpu_name})")
+        return True
+
+    # i5 Series filter (min. 6th generation)
+    if "I5-" in cpu_upper:
+        match = re.search(r"I5-(\d{4,5})", cpu_upper)
+        if match:
+            model_number = int(match.group(1))
+            # Block i5 models older than 6200
+            if model_number < 6200:
+                messagebox.showerror(
+                    "Hardware Requirement Error",
+                    f"Your i5 processor is too old for this application.\n"
+                    f"Required: min. i5-6200U\n"
+                    f"Detected: {full_cpu_name}",
+                )
+                return False
+            return True
+        return True
+
+    # Block other series (i3, Celeron, Pentium, etc.)
+    messagebox.showerror(
+        "Hardware Requirement Error",
+        f"Your processor does not meet the minimum requirements.\n"
+        f"Required: Intel i5 (6th Gen+), i7, i9, Ultra or Xeon.\n"
+        f"Detected: {full_cpu_name}",
+    )
+    return False
+
+
+kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
+
+
+# Definiujemy precyzyjnie typy dla WinAPI, żeby uniknąć błędu 6
+kernel32.SetProcessWorkingSetSize.argtypes = [
+    wintypes.HANDLE,
+    ctypes.c_size_t,
+    ctypes.c_size_t,
+]
+kernel32.SetProcessWorkingSetSize.restype = wintypes.BOOL
+
+
+def lock_process_memory():
+    if platform.system() == "Windows":
+        # -1 to stała oznaczająca bieżący proces (pseudohandle)
+        current_process_handle = wintypes.HANDLE(-1)
+
+        min_size = 1 * 1024 * 1024
+        max_size = 4 * 1024 * 1024 * 1024
+
+        if not kernel32.SetProcessWorkingSetSize(
+            current_process_handle, min_size, max_size
+        ):
+            err = kernel32.GetLastError()  # lub ctypes.get_last_error()
+            print(f"Błąd WinAPI: {err}")
+            return False
+
+        print("Sukces: Pamięć zoptymalizowana.")
+        return True
+    return False
+
+
 import os
 import winreg
 import json
 import zlib
 import threading
-import ctypes
 import gc
 from pathlib import Path
-from tkinter import filedialog, messagebox
 
 import customtkinter as ctk
 from argon2.low_level import hash_secret_raw, Type
@@ -14,7 +121,7 @@ from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
 # ---------------- CONFIG ----------------
-APP_NAME = "MiniVault Final v3.0"
+APP_NAME = "MiniVault 3.1"
 local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/AppData/Local")
 BASE_DIR = Path(local_appdata) / "Programs" / APP_NAME
 VAULT_FILE = "vault.mvault"
@@ -78,6 +185,10 @@ class CryptoManager:
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
+        if not lock_process_memory():
+            print(
+                "Uwaga: Nie udało się zoptymalizować pamięci, ale kontynuuję uruchamianie..."
+            )
         self.title(APP_NAME)
         self.geometry("600x650")
         BASE_DIR.mkdir(parents=True, exist_ok=True)
@@ -211,23 +322,36 @@ class App(ctk.CTk):
                 text_color="#2ecc71",
             ).pack(pady=5)
 
-        # Przycisk Logowania
+        # Przycisk Logowania z efektem Primary
         self.login_btn = ctk.CTkButton(
             self,
-            text="Login",
+            text="LOGIN",
             command=lambda: self.start_task("login"),
             fg_color="#2ecc71",
             hover_color="#27ae60",
+            corner_radius=20,
+            border_width=2,
+            border_color="#27ae60",
+            font=("Segoe UI", 13, "bold"),
+            height=45,
+            width=220,
         )
-        self.login_btn.pack(pady=10)
+        self.login_btn.pack(pady=(20, 10))
 
         # Przycisk Rejestracji
         self.reg_btn = ctk.CTkButton(
             self,
-            text="Register",
+            text="REGISTER",
             command=lambda: self.start_task("register"),
-            fg_color="#34495e",
-            hover_color="#2c3e50",
+            fg_color="transparent",
+            text_color=("#34495e", "#bdc3c7"),  # Kolor dostosowany do trybu Light/Dark
+            hover_color="#34495e",
+            corner_radius=20,
+            border_width=2,
+            border_color="#34495e",
+            font=("Segoe UI", 12, "bold"),
+            height=40,
+            width=220,
         )
         self.reg_btn.pack(pady=5)
 
@@ -528,5 +652,11 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
-    app = App()
-    app.mainloop()
+    # 1. Najpierw sprawdzamy sprzęt
+    if check_hardware_requirements():
+        # 2. Jeśli sprzęt jest OK, tworzymy okno (teraz zadziała, bo klasa App jest wyżej)
+        app = App()
+        app.mainloop()
+    else:
+        # 3. Jeśli sprzęt za słaby, zamykamy wszystko
+        sys.exit()
