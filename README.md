@@ -2,6 +2,7 @@
 
 **MiniVault** is a security tool engineered for mission-critical data protection.
 
+[![codecov.io](https://codecov.io/github/P-H-C/phc-winner-argon2/coverage.svg?branch=master)](https://codecov.io/github/P-H-C/phc-winner-argon2?branch=master)
 ![MiniVault Interface](screenshots/minivault.png)
 ![MiniVault Interface - Win+V is ENABLED](screenshots/minivault_winv_enabled.png)
 ![MiniVault Learn More](screenshots/winv_risk.png)
