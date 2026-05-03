@@ -8,11 +8,9 @@ from tkinter import messagebox
 import pyperclip
 import customtkinter as ctk
 
-# --- TWARDA BLOKADA ASM ---
 LIB_PATH = Path(__file__).parent / "scrub.dll"
 
 if not LIB_PATH.exists():
-    # Używamy standardowego tkinter, bo CTK może jeszcze nie być zainicjalizowane
     import tkinter as tk
 
     root = tk.Tk()
@@ -32,16 +30,11 @@ except Exception as e:
 def asm_scrub(data):
     """Bezpośrednie zerowanie RAM za pomocą skompilowanego ASM."""
     if isinstance(data, bytearray):
-        # Pobieramy adres bufora bytearray
         addr = ctypes.addressof((ctypes.c_char * len(data)).from_buffer(data))
         scrub_lib.secure_scrub_memory(addr, len(data))
     elif isinstance(data, str) and data:
-        # Zerujemy bufor stringa (Python x64 offset +32)
         addr = id(data) + 32
         scrub_lib.secure_scrub_memory(addr, len(data))
-
-
-# --- GENERATOR ---
 
 
 def generate_secure_password_raw(length=64):
@@ -115,10 +108,10 @@ class PasswordGeneratorWindow(ctk.CTkToplevel):
         self.pwd_entry.delete(0, "end")
         self.pwd_entry.insert(0, pwd_str)
 
-        # Natychmiastowe niszczenie śladów
         asm_scrub(pwd_bytes)
         asm_scrub(pwd_str)
-        gc.collect()
+        gc.collect(2)
+        gc.collect(2)
 
     def toggle_visibility(self):
         if self.pwd_entry.cget("show") == "*":
@@ -134,7 +127,6 @@ class PasswordGeneratorWindow(ctk.CTkToplevel):
             pyperclip.copy(raw_pwd)
             self.copy_btn.configure(text="✅ Copied!", fg_color="green")
 
-            # Czyszczenie zmiennej lokalnej przez ASM
             asm_scrub(raw_pwd)
 
             self.after(10000, self.secure_clear_clipboard)
@@ -147,7 +139,7 @@ class PasswordGeneratorWindow(ctk.CTkToplevel):
         try:
             pyperclip.copy("")
             self.clipboard_clear()
-            self.clipboard_append("DEADBEEF")  # Nadpisanie śmieciami
+            self.clipboard_append("DEADBEEF")
             self.clipboard_clear()
         except:
             pass
