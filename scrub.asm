@@ -1,5 +1,3 @@
-; scrub.asm - Bezpieczne zerowanie pamięci
-; Kompilacja: nasm -f win64 scrub.asm -o scrub.o
 
 section .text
 global secure_scrub_memory
@@ -8,18 +6,18 @@ secure_scrub_memory:
     ; RCX = adres bufora (pointer)
     ; RDX = rozmiar w bajtach (size_t)
     
-    test rcx, rcx       ; Sprawdź czy adres nie jest nullem
+    test rcx, rcx       
     jz .done
-    test rdx, rdx       ; Sprawdź czy rozmiar > 0
+    test rdx, rdx       
     jz .done
 
-    mov rdi, rcx        ; RDI = cel dla stosb
-    mov rcx, rdx        ; RCX = licznik dla rep
-    xor rax, rax        ; RAX = 0 (wartość do wypełnienia)
+    mov rdi, rcx        
+    mov rcx, rdx        
+    xor rax, rax        
     
-    rep stosb           ; Wypełnia pamięć: [RDI] = AL, RDI++, RCX-- aż RCX=0
+    rep stosb          
 
-    ; Bariera pamięci (opcjonalnie, dla pewności zapisu przed powrotem)
+
     mfence
 
 .done:
