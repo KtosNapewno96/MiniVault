@@ -2,7 +2,6 @@ import json
 import os
 from pathlib import Path
 
-# Używamy tej samej ścieżki co w głównym kodzie
 APP_NAME = "MiniVault 3.1"
 local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/AppData/Local")
 CONFIG_DIR = Path(local_appdata) / "Programs" / APP_NAME
