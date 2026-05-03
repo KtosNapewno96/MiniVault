@@ -22,7 +22,8 @@
 - **Memory-Hard Security:** The 1 GB RAM allocation during key derivation creates a "Secure Sandbox" that protects against unauthorized memory scraping during the transformation phase.
 - **Clipboard Sanitization:** Real-time monitoring and purging of Windows Clipboard (including Win+V history) to prevent sensitive data leakage.
 
-https://pl.wikipedia.org/wiki/Advanced_Encryption_Standard
+![AES-256](https://pl.wikipedia.org/wiki/Advanced_Encryption_Standard)
+![Argon2](https://github.com/P-H-C/phc-winner-argon2)
 
 ### 🔒 Zero-Knowledge & Local-First Architecture
 
