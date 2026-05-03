@@ -22,6 +22,8 @@
 - **Memory-Hard Security:** The 1 GB RAM allocation during key derivation creates a "Secure Sandbox" that protects against unauthorized memory scraping during the transformation phase.
 - **Clipboard Sanitization:** Real-time monitoring and purging of Windows Clipboard (including Win+V history) to prevent sensitive data leakage.
 
+https://pl.wikipedia.org/wiki/Advanced_Encryption_Standard
+
 ### 🔒 Zero-Knowledge & Local-First Architecture
 
 - **Offline by Design:** MiniVault operates with zero network permissions. No data, metadata, or encryption keys are ever transmitted to external servers or cloud providers.
@@ -48,4 +50,5 @@ To maintain the integrity of the 1 GB Argon2id derivation process:
 ## 📜 Legal & Compliance
 
 - **Privacy:** No telemetry, no cloud-sync. Your keys and data never leave your local environment.
-- **License:** Proprietary / All Rights Reserved.
+
+**---**
