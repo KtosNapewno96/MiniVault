@@ -5,7 +5,7 @@
 ![MiniVault Interface](screenshots/minivault.png)
 ![MiniVault Interface - Win+V is ENABLED](screenshots/minivault_winv_enabled.png)
 ![MiniVault Learn More](screenshots/winv_risk.png)
-![MiniVault Generate Password](screenshot/generate_password_screen.png)
+![MiniVault Generate Password](screenshots/generate_password_screen.png)
 
 ---
 
