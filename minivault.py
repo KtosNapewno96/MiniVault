@@ -876,4 +876,8 @@ if __name__ == "__main__":
         app.mainloop()
     else:
         
+<<<<<<< HEAD
         sys.exit()
+=======
+        sys.exit()
+>>>>>>> 8e3bb923156231195a25095dc6e081648a01be84
