@@ -23,7 +23,7 @@
 ### 🔒 Zero-Knowledge & Local-First Architecture
 
 - **Offline by Design:** MiniVault operates with zero network permissions. No data, metadata, or encryption keys are ever transmitted to external servers or cloud providers.
-- **Edge-Only Processing:** 100% of cryptographic operations occur locally on your hardware. Your plaintext and vault remain strictly within your machine’s physical boundaries.
+- **100%** of cryptographic operations occur locally on your hardware. Your plaintext and vault remain strictly within your machine’s physical boundaries.
 - **No Telemetry:** We do not track usage, IP addresses, or performance metrics. What happens in MiniVault, stays in MiniVault.
 
 ---
