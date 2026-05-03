@@ -4,9 +4,7 @@ section .text
 global secure_scrub_argon2
 global DllMain
 
-; Standardowy punkt wejścia dla DLL na Windows x64
 DllMain:
-    ; RCX = hinstDLL, RDX = fdwReason, R8 = lpvReserved
     mov eax, 1
     ret
 
