@@ -5,24 +5,19 @@ class LearnMoreWindow(ctk.CTkToplevel):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(parent, *args, **kwargs)
 
-        # --- Ustawienia systemowe okna ---
         self.title("MiniVault Security Briefing")
         self.resizable(False, False)
 
-        # Ukrywamy okno na czas obliczeń pozycji, żeby nie "skakało"
         self.withdraw()
 
-        # --- Kolory i Design ---
         brand_red = "#e74c3c"
         brand_green = "#2ecc71"
 
-        # --- GŁÓWNY KONTENER ---
         self.main_frame = ctk.CTkFrame(
             self, corner_radius=20, border_width=2, border_color=("gray80", "gray30")
         )
         self.main_frame.pack(padx=15, pady=15, fill="both", expand=True)
 
-        # --- NAGŁÓWEK (Baner Ostrzegawczy) ---
         self.header_frame = ctk.CTkFrame(
             self.main_frame, fg_color=brand_red, corner_radius=15, height=70
         )
@@ -37,13 +32,11 @@ class LearnMoreWindow(ctk.CTkToplevel):
         )
         self.title_label.pack(expand=True)
 
-        # --- SEKCJA TREŚCI (Scrollable) ---
         self.scroll_frame = ctk.CTkScrollableFrame(
             self.main_frame, fg_color="transparent", height=340
         )
         self.scroll_frame.pack(fill="both", expand=True, padx=12)
 
-        # Bloki informacyjne
         self._add_info_block(
             "📍 WHAT IS WINDOWS HISTORY?",
             "Windows 10/11 includes a 'Clipboard History' tool (Win+V). It records every text "
@@ -70,8 +63,7 @@ class LearnMoreWindow(ctk.CTkToplevel):
             "3. Clear existing history to wipe previous secrets.",
         )
 
-        # --- STOPKA / PRZYCISK Z TIMEREM ---
-        self.countdown = 3  # Czas odliczania w sekundach
+        self.countdown = 3
 
         self.footer_btn = ctk.CTkButton(
             self.main_frame,
@@ -86,11 +78,9 @@ class LearnMoreWindow(ctk.CTkToplevel):
         )
         self.footer_btn.pack(pady=15, padx=40, fill="x")
 
-        # --- FINALIZE WINDOW ---
         self._set_geometry(520, 600)
-        self.deiconify()  # Pokazujemy okno po ustawieniu pozycji
+        self.deiconify() 
 
-        # Uruchomienie odliczania
         self.update_button_timer()
 
     def update_button_timer(self):
@@ -143,5 +133,5 @@ class LearnMoreWindow(ctk.CTkToplevel):
         y = (screen_height // 2) - (height // 2)
 
         if y < 60:
-            y = 60  # Zabezpieczenie przed ucieczką za górę
+            y = 60
         self.geometry(f"{width}x{height}+{x}+{y}")
