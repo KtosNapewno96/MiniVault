@@ -11,8 +11,20 @@ import config_manager as cfg
 from learn_more import LearnMoreWindow
 import multiprocessing
 import tkinter as tk
+from pathlib import Path
 
 import winreg
+
+try:
+    lock_lib = ctypes.CDLL(str(Path(__file__).parent / "lock_dump.dll"))
+
+    lock_lib.secure_isolate_process.argtypes = []
+    lock_lib.secure_isolate_process.restype = None
+
+    lock_lib.secure_isolate_process()
+    print(" System izolacji procesów: AKTYWNY")
+except Exception as e:
+    print(f" Nie udało się aktywować blokady zrzutu: {e}")
 
 
 def get_cpu_name():
@@ -117,22 +129,19 @@ import json
 import zlib
 import threading
 import gc
-from pathlib import Path
 
 import customtkinter as ctk
 from argon2.low_level import hash_secret_raw, Type
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 
-# ---------------- CONFIG ----------------
-APP_NAME = "MiniVault 3.2"
+APP_NAME = "MiniVault 3.3"
 local_appdata = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/AppData/Local")
 BASE_DIR = Path(local_appdata) / "Programs" / APP_NAME
 VAULT_FILE = "vault.mvault"
 MAGIC = b"AES-256"
 
 
-# ---------------- MEMORY SECURITY ----------------
 def scrub_sensitive(obj):
     if isinstance(obj, bytearray):
         for i in range(len(obj)):
@@ -163,14 +172,14 @@ try:
         scrub_lib.secure_scrub_argon2.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
         scrub_lib.secure_scrub_argon2.restype = None
         HAS_SCRUBBER = True
-        print(f"✅ Załadowano ASM: {DLL_PATH.name}")
+        print(f"[OK] ASM Loaded: {DLL_PATH.name}")
     else:
         root = tk.Tk()
         root.withdraw()
         messagebox.showerror(
             "CRITICAL ERROR", f"ACCESS DENIED: Module '{DLL_PATH.name}' not found!"
         )
-        sys.exit(1) 
+        sys.exit(1)
 except Exception as e:
     root = tk.Tk()
     root.withdraw()
@@ -206,7 +215,7 @@ class CryptoManager:
             key = hash_secret_raw(
                 secret=tmp_passwd_obj,
                 salt=salt,
-                time_cost=5,
+                time_cost=10,
                 memory_cost=1048576,
                 parallelism=4,
                 hash_len=32,
@@ -225,7 +234,9 @@ class CryptoManager:
                 password_ba[i] = 0
 
             del tmp_passwd_obj
-            gc.collect()
+            gc.collect(2)
+            gc.collect(2)
+            gc.collect(2)
 
     @staticmethod
     def encrypt(data: bytes, key: bytes) -> bytes:
@@ -251,7 +262,7 @@ class App(ctk.CTk):
         super().__init__()
         if not lock_process_memory():
             print(
-                "Uwaga: Nie udało się zoptymalizować pamięci, ale kontynuuję uruchamianie..."
+                "Warning: process memory locking failed. The application will continue, but security may be reduced."
             )
         self.title(APP_NAME)
         self.geometry("600x650")
@@ -267,7 +278,7 @@ class App(ctk.CTk):
         self.key, self.salt = None, None
         self.vault_index, self.vault_path = {}, None
         self.selected_file, self.auto_lock_timer = None, None
-        self.remaining_seconds = 60  # Zmieniono z 10 na 60
+        self.remaining_seconds = 60
         self.is_busy = False
 
         self.bind_all("<Any-KeyPress>", lambda e: self.reset_timer())
@@ -282,7 +293,7 @@ class App(ctk.CTk):
 
     def open_password_generator(self):
         if hasattr(self, "pw_gen_window") and self.pw_gen_window.winfo_exists():
-            self.pw_gen_window.focus()  # Jeśli okno już jest, przenieś na przód
+            self.pw_gen_window.focus()
         else:
             self.pw_gen_window = PasswordGeneratorWindow(self)
 
@@ -298,7 +309,7 @@ class App(ctk.CTk):
         elif self.key and self.remaining_seconds < 0:
             self.lock()
 
-    def reset_timer(self, seconds=60):
+    def reset_timer(self, seconds=60): # 60s default
         if self.key:
             if self.auto_lock_timer:
                 self.after_cancel(self.auto_lock_timer)
@@ -352,12 +363,13 @@ class App(ctk.CTk):
         cfg.save_settings(self.settings)
 
     def open_learn_more(self):
-        """Otwiera okno info w całkowicie odizolowanym procesie."""
-        import multiprocessing
+        """Otwiera okno info w osobnym wątku, zachowując spójność procesu."""
 
-        p = multiprocessing.Process(target=launch_learn_more, name="VaultInfoProcess")
-        p.daemon = True 
-        p.start()
+        # new thread
+        t = threading.Thread(target=launch_learn_more, name="VaultInfoThread")
+        t.daemon = True
+        t.start()
+        print("[INFO] Okno Learn More otwarte wewnątrz bezpiecznego procesu.")
 
     def show_login(self):
         if self.auto_lock_timer:
@@ -366,15 +378,15 @@ class App(ctk.CTk):
         self.title(APP_NAME)
         self.clear()
 
+        # Title
         ctk.CTkLabel(
             self,
-            text="MiniVault 3.2: Assembly and AES-256",
+            text="⚡ MiniVault 3.3: C and AES-256",
             font=("Consolas", 22, "bold"),
         ).pack(pady=30)
-
+        
         self.u_ent = ctk.CTkEntry(self, placeholder_text="User", width=250)
         self.u_ent.pack(pady=10)
-
         if self.settings.get("last_user"):
             self.u_ent.insert(0, self.settings["last_user"])
 
@@ -442,7 +454,7 @@ class App(ctk.CTk):
                 text_color=(
                     "#34495e",
                     "#bdc3c7",
-                ), 
+                ),
                 font=("Arial", 11, "underline"),
                 command=self.open_learn_more,
             ).pack(side="left", padx=10)
@@ -470,6 +482,7 @@ class App(ctk.CTk):
             highlightthickness=0,
         )
 
+        # Przycisk Rejestracji
         self.reg_btn = ctk.CTkButton(
             self,
             text="REGISTER",
@@ -617,6 +630,8 @@ class App(ctk.CTk):
 
             scrub_sensitive(dec_data)
             scrub_sensitive(bytearray(dec_data_raw))
+            gc.collect(2)
+            gc.collect(2)
 
             self.key, self.salt, self.vault_path = key, salt, path
             self.after(0, self.show_vault)
@@ -783,6 +798,9 @@ class App(ctk.CTk):
                 ),
             )
 
+        gc.collect(2)
+        gc.collect(2)
+
     def start_delete(self):
         if not self.selected_file:
             return
@@ -870,14 +888,9 @@ class App(ctk.CTk):
 
 
 if __name__ == "__main__":
-    multiprocessing.freeze_support()
     if check_hardware_requirements():
         app = App()
         app.mainloop()
     else:
-        
-<<<<<<< HEAD
+        # 3. Jeśli sprzęt za słaby, zamykamy wszystko
         sys.exit()
-=======
-        sys.exit()
->>>>>>> 8e3bb923156231195a25095dc6e081648a01be84
